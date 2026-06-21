@@ -100,11 +100,11 @@ class AppController {
             </div>
 
             <div class="control-block">
-                <label>Volume: <span class="val-vol" style="color:var(--accent-yellow)">0%</span></label>
+                <label>Volume: <input type="number" class="val-vol-input" value="0" min="0" max="100" style="width: 45px; padding: 0; margin: 0; height: auto; text-align: right; color: var(--accent-yellow); border: none !important; background: transparent; font-family: var(--font-mono); font-size: 0.85rem; outline: none;">%</label>
                 <input type="range" class="tone-vol" value="0.0" min="0" max="1" step="0.01">
             </div>
             <div class="control-block">
-                <label>Pan: <span class="val-pan" style="color:var(--accent-yellow)">C</span></label>
+                <label>Pan: <input type="number" class="val-pan-input" value="0" min="-100" max="100" style="width: 45px; padding: 0; margin: 0; height: auto; text-align: right; color: var(--accent-yellow); border: none !important; background: transparent; font-family: var(--font-mono); font-size: 0.85rem; outline: none;"></label>
                 <input type="range" class="tone-pan" value="0" min="-1" max="1" step="0.01">
             </div>
             <div class="control-block" style="justify-content: flex-end; flex: 0;">
@@ -130,23 +130,47 @@ class AppController {
             this.renderDynamicControls(tone.id, row, e.target.value);
         });
 
-        const valVol = row.querySelector('.val-vol');
-        row.querySelector('.tone-vol').addEventListener('input', (e) => {
-            const v = e.target.value;
+        const valVolIn = row.querySelector('.val-vol-input');
+        const sliderVol = row.querySelector('.tone-vol');
+        
+        sliderVol.addEventListener('input', (e) => {
+            const v = parseFloat(e.target.value);
             this.kernel.updateTone(tone.id, 'volume', v);
-            if (valVol) valVol.textContent = `${Math.round(v * 100)}%`;
+            if (valVolIn) valVolIn.value = Math.round(v * 100);
         });
+        
+        if (valVolIn) {
+            valVolIn.addEventListener('change', (e) => {
+                let val = parseInt(e.target.value);
+                if (isNaN(val)) val = 0;
+                val = Math.max(0, Math.min(100, val));
+                e.target.value = val;
+                const v = val / 100.0;
+                sliderVol.value = v;
+                this.kernel.updateTone(tone.id, 'volume', v);
+            });
+        }
 
-        const valPan = row.querySelector('.val-pan');
-        row.querySelector('.tone-pan').addEventListener('input', (e) => {
+        const valPanIn = row.querySelector('.val-pan-input');
+        const sliderPan = row.querySelector('.tone-pan');
+        
+        sliderPan.addEventListener('input', (e) => {
             const v = parseFloat(e.target.value);
             this.kernel.updateTone(tone.id, 'pan', v);
-            if (valPan) {
-                if (v === 0) valPan.textContent = 'C';
-                else if (v < 0) valPan.textContent = `L${Math.round(-v * 100)}`;
-                else valPan.textContent = `R${Math.round(v * 100)}`;
-            }
+            if (valPanIn) valPanIn.value = Math.round(v * 100);
         });
+
+        if (valPanIn) {
+            valPanIn.addEventListener('change', (e) => {
+                let val = parseInt(e.target.value);
+                if (isNaN(val)) val = 0;
+                val = Math.max(-100, Math.min(100, val));
+                e.target.value = val;
+                const v = val / 100.0;
+                sliderPan.value = v;
+                this.kernel.updateTone(tone.id, 'pan', v);
+            });
+        }
 
         row.querySelector('.btn-remove').addEventListener('click', () => {
             this.kernel.removeTone(tone.id);
