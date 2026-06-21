@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Acoustic Lab Master</title>
+    <link rel="stylesheet" href="css/laboratory.css">
+</head>
+<body>
+    <header>
+        <h1>Acoustic Lab Master</h1>
+        <div class="controls-group">
+            <div class="control-block">
+                <label for="master-samplerate">Sample Rate</label>
+                <select id="master-samplerate">
+                    <option value="auto">Auto (Device Default)</option>
+                    <option value="44100">44.1 kHz</option>
+                    <option value="48000">48.0 kHz</option>
+                    <option value="88200">88.2 kHz</option>
+                    <option value="96000">96.0 kHz</option>
+                    <option value="192000">192.0 kHz</option>
+                </select>
+            </div>
+            <div class="control-block">
+                <label for="master-fftsize">FFT Size</label>
+                <select id="master-fftsize">
+                    <option value="1024">1024</option>
+                    <option value="2048">2048</option>
+                    <option value="4096">4096</option>
+                    <option value="8192" selected>8192</option>
+                    <option value="16384">16384</option>
+                    <option value="32768">32768</option>
+                </select>
+            </div>
+            <button id="btn-power">Power ON</button>
+        </div>
+    </header>
+
+    <main>
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">Signal Stacking</h2>
+                <button id="btn-add-tone">+ Add Tone</button>
+            </div>
+            <div id="signal-stack" class="signal-table">
+                <!-- Tone rows will be injected here by app.js -->
+                <div class="empty-state" style="color: var(--text-secondary); text-align: center; font-family: var(--font-mono); padding: 2rem;">
+                    AUDIO SYSTEM OFFLINE. POWER ON TO BEGIN.
+                </div>
+            </div>
+        </section>
+        
+        <!-- Placeholders for future waves -->
+        <section class="panel" style="opacity: 0.5; pointer-events: none;">
+            <div class="panel-header">
+                <h2 class="panel-title">Analysis Engine (Wave 3)</h2>
+            </div>
+            <div style="height: 150px; border: 1px dashed var(--border-color); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); color: var(--text-secondary);">
+                SPECTRUM VISUALIZER OFFLINE
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
