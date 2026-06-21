@@ -253,18 +253,19 @@ class AppController {
                 </div>
                 <div class="control-block">
                     <label>Duration (s)</label>
-                    <input type="number" class="sweep-dur" value="1.0" min="0.1" max="60" step="0.1">
+                    <input type="number" class="sweep-dur" value="${tone.state.duration || 1.0}" min="0.1" max="60" step="0.1">
                 </div>
                 <div class="control-block">
                     <label>Mode</label>
                     <select class="sweep-mode">
-                        <option value="one-shot">One-Shot</option>
-                        <option value="loop">Loop</option>
-                        <option value="ping-pong">Ping-Pong</option>
+                        <option value="one-shot" ${tone.state.sweepMode==='one-shot'?'selected':''}>One-Shot</option>
+                        <option value="loop" ${tone.state.sweepMode==='loop'?'selected':''}>Loop</option>
+                        <option value="ping-pong" ${tone.state.sweepMode==='ping-pong'?'selected':''}>Ping-Pong</option>
                     </select>
                 </div>
-                <div class="control-block" style="justify-content: flex-end;">
-                    <button class="btn-restart-sweep" style="width: 100%;">Trigger</button>
+                <div class="control-block">
+                    <label>&nbsp;</label>
+                    <button class="btn-restart-sweep" style="border-color: var(--accent-cyan); color: var(--accent-cyan);">Trigger</button>
                 </div>
             `;
             

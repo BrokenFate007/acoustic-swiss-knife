@@ -21,7 +21,7 @@ class LabSignalProcessor extends AudioWorkletProcessor {
         this.currentPhase = 0;
         this.sweepTime = 0;
         this.sweepDirection = 1; 
-        this.isPlaying = true;
+        this.isPlaying = false;
 
         this.port.onmessage = (event) => {
             const data = event.data;
