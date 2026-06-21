@@ -100,11 +100,11 @@ class AppController {
             </div>
 
             <div class="control-block">
-                <label>Volume</label>
+                <label>Volume: <span class="val-vol" style="color:var(--accent-yellow)">0%</span></label>
                 <input type="range" class="tone-vol" value="0.0" min="0" max="1" step="0.01">
             </div>
             <div class="control-block">
-                <label>Pan (L/R)</label>
+                <label>Pan: <span class="val-pan" style="color:var(--accent-yellow)">C</span></label>
                 <input type="range" class="tone-pan" value="0" min="-1" max="1" step="0.01">
             </div>
             <div class="control-block" style="justify-content: flex-end; flex: 0;">
@@ -130,12 +130,22 @@ class AppController {
             this.renderDynamicControls(tone.id, row, e.target.value);
         });
 
+        const valVol = row.querySelector('.val-vol');
         row.querySelector('.tone-vol').addEventListener('input', (e) => {
-            this.kernel.updateTone(tone.id, 'volume', e.target.value);
+            const v = e.target.value;
+            this.kernel.updateTone(tone.id, 'volume', v);
+            if (valVol) valVol.textContent = `${Math.round(v * 100)}%`;
         });
 
+        const valPan = row.querySelector('.val-pan');
         row.querySelector('.tone-pan').addEventListener('input', (e) => {
-            this.kernel.updateTone(tone.id, 'pan', e.target.value);
+            const v = parseFloat(e.target.value);
+            this.kernel.updateTone(tone.id, 'pan', v);
+            if (valPan) {
+                if (v === 0) valPan.textContent = 'C';
+                else if (v < 0) valPan.textContent = `L${Math.round(-v * 100)}`;
+                else valPan.textContent = `R${Math.round(v * 100)}`;
+            }
         });
 
         row.querySelector('.btn-remove').addEventListener('click', () => {

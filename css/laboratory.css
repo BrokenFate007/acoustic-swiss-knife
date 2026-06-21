@@ -160,6 +160,15 @@ main {
 .signal-row input[type="range"] {
   width: 100%;
   accent-color: var(--accent-cyan);
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  height: auto;
+}
+
+.signal-row input[type="range"]:focus {
+  box-shadow: none !important;
 }
 
 .signal-row input[type="number"], .signal-row select {
