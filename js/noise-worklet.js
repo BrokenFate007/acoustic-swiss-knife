@@ -3,7 +3,7 @@ class LabSignalProcessor extends AudioWorkletProcessor {
     constructor() {
         super();
         this.type = 'sine'; // sine, square, sawtooth, triangle, white, pink, brown, sweep-lin, sweep-log
-        this.sampleRate = currentSampleRate; 
+        this.sampleRate = sampleRate; 
         
         // Pink Noise State (Paul Kellet's filter)
         this.b0 = 0; this.b1 = 0; this.b2 = 0;

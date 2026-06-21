@@ -24,7 +24,7 @@ export class AudioKernel {
         this.masterGain.connect(this.ctx.destination);
         
         try {
-            await this.ctx.audioWorklet.addModule('js/noise-worklet.js');
+            await this.ctx.audioWorklet.addModule(`js/noise-worklet.js?v=${Date.now()}`);
             this.workletLoaded = true;
             console.log('[AudioKernel] AudioWorklet Loaded Successfully.');
         } catch (e) {
