@@ -2,6 +2,7 @@ export class AudioKernel {
     constructor() {
         this.ctx = null;
         this.masterGain = null;
+        this.analyser = null;
         this.tones = new Map();
         this.toneCounter = 0;
         this.workletLoaded = false;
@@ -20,8 +21,16 @@ export class AudioKernel {
         this.ctx = new (window.AudioContext || window.webkitAudioContext)(options);
         
         this.masterGain = this.ctx.createGain();
-        this.masterGain.gain.value = 0.5; 
-        this.masterGain.connect(this.ctx.destination);
+        this.masterGain.gain.value = 0.5;
+
+        this.analyser = this.ctx.createAnalyser();
+        this.analyser.fftSize = 8192;
+        this.analyser.smoothingTimeConstant = 0.8;
+        this.analyser.minDecibels = -120;
+        this.analyser.maxDecibels = 0;
+
+        this.masterGain.connect(this.analyser);
+        this.analyser.connect(this.ctx.destination);
         
         try {
             await this.ctx.audioWorklet.addModule(`js/noise-worklet.js?v=${Date.now()}`);
@@ -192,6 +201,22 @@ export class AudioKernel {
         }
     }
 
+    getAnalyser() {
+        return this.analyser;
+    }
+
+    setFFTSize(size) {
+        if (this.analyser) {
+            this.analyser.fftSize = size;
+        }
+    }
+
+    setSmoothing(value) {
+        if (this.analyser) {
+            this.analyser.smoothingTimeConstant = value;
+        }
+    }
+
     stopAll() {
         const ids = Array.from(this.tones.keys());
         for (const id of ids) {
@@ -200,6 +225,7 @@ export class AudioKernel {
         if (this.ctx) {
             this.ctx.close();
             this.ctx = null;
+            this.analyser = null;
             this.workletLoaded = false;
         }
     }

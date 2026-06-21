@@ -1,4 +1,5 @@
 import { AudioKernel } from './audio-kernel.js';
+import { SpectrumVisualizer } from './spectrum-visualizer.js';
 
 class AppController {
     constructor() {
@@ -9,8 +10,15 @@ class AppController {
             btnPower: document.getElementById('btn-power'),
             btnAddTone: document.getElementById('btn-add-tone'),
             selectSampleRate: document.getElementById('master-samplerate'),
-            signalStack: document.getElementById('signal-stack')
+            selectFFTSize: document.getElementById('master-fftsize'),
+            signalStack: document.getElementById('signal-stack'),
+            spectrumCanvas: document.getElementById('spectrum-canvas'),
+            statsStrip: document.getElementById('stats-strip'),
+            dbMin: document.getElementById('db-min'),
+            dbMax: document.getElementById('db-max')
         };
+
+        this.visualizer = null;
 
         this.bindEvents();
     }
@@ -19,6 +27,26 @@ class AppController {
         this.ui.btnPower.addEventListener('click', () => this.togglePower());
         this.ui.btnAddTone.addEventListener('click', () => this.addToneRow());
         this.ui.selectSampleRate.addEventListener('change', () => this.handleSampleRateChange());
+
+        // FFT Size control
+        this.ui.selectFFTSize.addEventListener('change', (e) => {
+            const size = parseInt(e.target.value, 10);
+            this.kernel.setFFTSize(size);
+            if (this.visualizer) {
+                this.visualizer.updateAnalyser(this.kernel.getAnalyser(), this.kernel.ctx.sampleRate);
+            }
+        });
+
+        // dB Range zoom controls
+        const updateDbRange = () => {
+            if (this.visualizer) {
+                const min = parseInt(this.ui.dbMin.value, 10) || -120;
+                const max = parseInt(this.ui.dbMax.value, 10) || 0;
+                this.visualizer.setDbRange(min, max);
+            }
+        };
+        this.ui.dbMin.addEventListener('change', updateDbRange);
+        this.ui.dbMax.addEventListener('change', updateDbRange);
     }
 
     async togglePower() {
@@ -44,12 +72,33 @@ class AppController {
                     </div>
                 `; 
                 console.log(`System Online. Effective Sample Rate: ${actualSr} Hz`);
+
+                // Start spectrum visualizer
+                const fftSize = parseInt(this.ui.selectFFTSize.value, 10);
+                this.kernel.setFFTSize(fftSize);
+                this.visualizer = new SpectrumVisualizer(
+                    this.ui.spectrumCanvas,
+                    this.ui.statsStrip,
+                    this.kernel.getAnalyser(),
+                    actualSr
+                );
+                const dbMin = parseInt(this.ui.dbMin.value, 10) || -120;
+                const dbMax = parseInt(this.ui.dbMax.value, 10) || 0;
+                this.visualizer.setDbRange(dbMin, dbMax);
+                this.visualizer.start();
             } catch (err) {
                 console.error("Failed to initialize Audio Engine:", err);
                 alert("Failed to start audio engine. " + err.message);
             }
         } else {
             this.kernel.stopAll();
+
+            // Stop spectrum visualizer
+            if (this.visualizer) {
+                this.visualizer.destroy();
+                this.visualizer = null;
+            }
+
             this.isPoweredOn = false;
             this.ui.btnPower.textContent = 'POWER ON';
             this.ui.btnPower.classList.remove('danger');

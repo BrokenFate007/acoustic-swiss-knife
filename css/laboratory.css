@@ -206,3 +206,109 @@ input[type=number]::-webkit-outer-spin-button {
 input[type=number] {
   -moz-appearance: textfield; /* Firefox */
 }
+
+/* ============================================
+   SPECTRUM ANALYZER (WAVE 3)
+   ============================================ */
+
+.canvas-container {
+  width: 100%;
+  height: 280px;
+  background: #000;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+}
+
+.canvas-container canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Stats Strip */
+.stats-strip {
+  display: flex;
+  gap: 2rem;
+  padding: 0.75rem 0.5rem 0;
+  justify-content: center;
+}
+
+.stat-block {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat-value {
+  font-size: 1.3rem;
+  color: var(--accent-yellow);
+  font-weight: bold;
+  min-width: 55px;
+  text-align: right;
+}
+
+.stat-unit {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+/* dB Range Controls */
+.analyzer-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.db-range-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.db-range-control label {
+  font-size: 0.75rem;
+}
+
+.db-range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.db-range-inputs input[type="number"] {
+  width: 55px;
+  padding: 0.25rem 0.35rem;
+  font-size: 0.8rem;
+  text-align: center;
+  background: #000;
+  border: 1px solid var(--border-color);
+  color: var(--accent-cyan);
+  font-family: var(--font-mono);
+  border-radius: var(--radius);
+}
+
+.db-range-inputs input[type="number"]:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 6px rgba(0,255,255,0.3);
+}
+
+.db-range-separator {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.db-unit {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}

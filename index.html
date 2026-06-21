@@ -50,13 +50,40 @@
             </div>
         </section>
         
-        <!-- Placeholders for future waves -->
-        <section class="panel" style="opacity: 0.5; pointer-events: none;">
+        <section class="panel" id="analyzer-panel">
             <div class="panel-header">
-                <h2 class="panel-title">Analysis Engine (Wave 3)</h2>
+                <h2 class="panel-title">Spectrum Analyzer</h2>
+                <div class="analyzer-controls">
+                    <div class="db-range-control">
+                        <label>dB Range</label>
+                        <div class="db-range-inputs">
+                            <input type="number" id="db-min" value="-120" min="-150" max="-10" step="5" title="Min dB">
+                            <span class="db-range-separator">→</span>
+                            <input type="number" id="db-max" value="0" min="-50" max="0" step="5" title="Max dB">
+                            <span class="db-unit">dB</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div style="height: 150px; border: 1px dashed var(--border-color); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); color: var(--text-secondary);">
-                SPECTRUM VISUALIZER OFFLINE
+            <div class="canvas-container" id="canvas-container">
+                <canvas id="spectrum-canvas"></canvas>
+            </div>
+            <div class="stats-strip" id="stats-strip">
+                <div class="stat-block">
+                    <span class="stat-label">Leq</span>
+                    <span class="stat-value stat-leq">---</span>
+                    <span class="stat-unit">dB</span>
+                </div>
+                <div class="stat-block">
+                    <span class="stat-label">Lpeak</span>
+                    <span class="stat-value stat-lpeak">---</span>
+                    <span class="stat-unit">dB</span>
+                </div>
+                <div class="stat-block">
+                    <span class="stat-label">Crest</span>
+                    <span class="stat-value stat-crest">---</span>
+                    <span class="stat-unit">dB</span>
+                </div>
             </div>
         </section>
     </main>
