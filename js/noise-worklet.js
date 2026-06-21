@@ -26,16 +26,22 @@ class LabSignalProcessor extends AudioWorkletProcessor {
         this.port.onmessage = (event) => {
             const data = event.data;
             if (data.type !== undefined) this.type = data.type;
-            if (data.frequency !== undefined) this.frequency = data.frequency;
-            if (data.startFreq !== undefined) this.startFreq = data.startFreq;
-            if (data.endFreq !== undefined) this.endFreq = data.endFreq;
-            if (data.duration !== undefined) this.duration = data.duration;
+            if (data.frequency !== undefined) this.frequency = Number(data.frequency);
+            if (data.startFreq !== undefined) this.startFreq = Number(data.startFreq);
+            if (data.endFreq !== undefined) this.endFreq = Number(data.endFreq);
+            if (data.duration !== undefined) this.duration = Math.max(0.01, Number(data.duration));
             if (data.sweepMode !== undefined) this.sweepMode = data.sweepMode;
             if (data.reset) {
                 this.sweepTime = 0;
                 this.currentPhase = 0;
                 this.sweepDirection = 1;
                 this.isPlaying = true;
+                
+                this.port.postMessage({
+                    action: 'progress',
+                    progress: 0.0,
+                    freq: this.startFreq
+                });
             }
         };
     }
