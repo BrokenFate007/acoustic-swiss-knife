@@ -31,8 +31,11 @@ class AppController {
                 this.ui.btnPower.classList.add('danger');
                 this.ui.selectSampleRate.disabled = true; 
                 
-                this.ui.signalStack.innerHTML = ''; 
-                this.addToneRow();
+                this.ui.signalStack.innerHTML = `
+                    <div class="empty-state" style="color: var(--text-secondary); text-align: center; font-family: var(--font-mono); padding: 2rem;">
+                        SYSTEM ONLINE. ADD A SIGNAL TO BEGIN.
+                    </div>
+                `; 
                 console.log(`System Online. Effective Sample Rate: ${actualSr} Hz`);
             } catch (err) {
                 console.error("Failed to initialize Audio Engine:", err);
@@ -98,7 +101,7 @@ class AppController {
 
             <div class="control-block">
                 <label>Volume</label>
-                <input type="range" class="tone-vol" value="0.5" min="0" max="1" step="0.01">
+                <input type="range" class="tone-vol" value="0.0" min="0" max="1" step="0.01">
             </div>
             <div class="control-block">
                 <label>Pan (L/R)</label>

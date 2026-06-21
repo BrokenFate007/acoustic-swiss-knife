@@ -53,7 +53,7 @@ export class AudioKernel {
         const panner = this.ctx.createStereoPanner();
         const gain = this.ctx.createGain();
 
-        gain.gain.value = 0.5;
+        gain.gain.value = 0.0;
         panner.pan.value = 0;
 
         source.connect(panner);
