@@ -29,6 +29,12 @@ class AppController {
                 this.isPoweredOn = true;
                 this.ui.btnPower.textContent = 'POWER OFF';
                 this.ui.btnPower.classList.add('danger');
+                
+                if (sr === 'auto') {
+                    const autoOpt = this.ui.selectSampleRate.querySelector('option[value="auto"]');
+                    if (autoOpt) autoOpt.textContent = `Device Default (${actualSr} Hz)`;
+                }
+                
                 this.ui.selectSampleRate.disabled = true; 
                 
                 this.ui.signalStack.innerHTML = `
