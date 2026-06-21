@@ -15,7 +15,18 @@ class AppController {
             spectrumCanvas: document.getElementById('spectrum-canvas'),
             statsStrip: document.getElementById('stats-strip'),
             dbMin: document.getElementById('db-min'),
-            dbMax: document.getElementById('db-max')
+            dbMax: document.getElementById('db-max'),
+            // Wave 3.5: Analyzer controls
+            viewTabs: document.querySelectorAll('.view-tab'),
+            btnPeakHold: document.getElementById('btn-peak-hold'),
+            btnSaveRef: document.getElementById('btn-save-ref'),
+            btnFreeze: document.getElementById('btn-freeze'),
+            btnExport: document.getElementById('btn-export'),
+            selectWeighting: document.getElementById('setting-weighting'),
+            sliderSmoothing: document.getElementById('setting-smoothing'),
+            smoothingVal: document.getElementById('smoothing-val'),
+            selectBands: document.getElementById('setting-bands'),
+            selectDecay: document.getElementById('setting-decay')
         };
 
         this.visualizer = null;
@@ -47,6 +58,67 @@ class AppController {
         };
         this.ui.dbMin.addEventListener('change', updateDbRange);
         this.ui.dbMax.addEventListener('change', updateDbRange);
+
+        // === WAVE 3.5: View Tabs ===
+        this.ui.viewTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                this.ui.viewTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                if (this.visualizer) {
+                    this.visualizer.setView(tab.dataset.view);
+                }
+            });
+        });
+
+        // === Toolbar Buttons ===
+        this.ui.btnPeakHold.addEventListener('click', () => {
+            if (this.visualizer) {
+                const active = this.visualizer.togglePeakHold();
+                this.ui.btnPeakHold.classList.toggle('active', active);
+            }
+        });
+
+        this.ui.btnSaveRef.addEventListener('click', () => {
+            if (this.visualizer) {
+                if (this.visualizer.referenceData) {
+                    this.visualizer.clearReference();
+                    this.ui.btnSaveRef.classList.remove('active');
+                } else {
+                    this.visualizer.saveReference();
+                    this.ui.btnSaveRef.classList.add('active');
+                }
+            }
+        });
+
+        this.ui.btnFreeze.addEventListener('click', () => {
+            if (this.visualizer) {
+                const frozen = this.visualizer.toggleFreeze();
+                this.ui.btnFreeze.classList.toggle('active', frozen);
+            }
+        });
+
+        this.ui.btnExport.addEventListener('click', () => {
+            if (this.visualizer) this.visualizer.exportPNG();
+        });
+
+        // === Settings Controls ===
+        this.ui.selectWeighting.addEventListener('change', (e) => {
+            if (this.visualizer) this.visualizer.setWeighting(e.target.value);
+        });
+
+        this.ui.sliderSmoothing.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            this.kernel.setSmoothing(val);
+            if (this.ui.smoothingVal) this.ui.smoothingVal.textContent = val.toFixed(2);
+        });
+
+        this.ui.selectBands.addEventListener('change', (e) => {
+            if (this.visualizer) this.visualizer.setBands(e.target.value);
+        });
+
+        this.ui.selectDecay.addEventListener('change', (e) => {
+            if (this.visualizer) this.visualizer.setDecay(e.target.value);
+        });
     }
 
     async togglePower() {
