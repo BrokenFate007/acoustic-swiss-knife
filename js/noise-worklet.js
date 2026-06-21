@@ -80,6 +80,10 @@ class LabSignalProcessor extends AudioWorkletProcessor {
                 outSample *= 3.5; 
             }
             else if (this.type === 'sweep-lin' || this.type === 'sweep-log') {
+                // Guard: ensure startFreq < endFreq to prevent NaN in log sweep
+                const sf = Math.min(this.startFreq, this.endFreq) || 20;
+                const ef = Math.max(this.startFreq, this.endFreq) || 20000;
+
                 if (!this.isPlaying) {
                     outSample = 0;
                 } else {
@@ -87,9 +91,9 @@ class LabSignalProcessor extends AudioWorkletProcessor {
                     let currentFreq = 0;
                     
                     if (this.type === 'sweep-lin') {
-                        currentFreq = this.startFreq + t * (this.endFreq - this.startFreq);
+                        currentFreq = sf + t * (ef - sf);
                     } else { 
-                        currentFreq = this.startFreq * Math.pow(this.endFreq / this.startFreq, t);
+                        currentFreq = sf * Math.pow(ef / sf, t);
                     }
 
                     this.currentPhase += currentFreq / this.sampleRate;
@@ -102,7 +106,7 @@ class LabSignalProcessor extends AudioWorkletProcessor {
                         if (this.sweepMode === 'one-shot') {
                             this.isPlaying = false;
                             this.sweepTime = this.duration;
-                            currentFreq = this.endFreq;
+                            currentFreq = ef;
                             
                             // Guarantee exact 100% UI update when completed
                             shouldReportProgress = true;

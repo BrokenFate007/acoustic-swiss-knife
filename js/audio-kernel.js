@@ -71,7 +71,7 @@ export class AudioKernel {
             state: {
                 type: 'sine',
                 frequency: 440,
-                volume: 0.5,
+                volume: 0.0,
                 pan: 0,
                 startFreq: 20,
                 endFreq: 20000,
@@ -193,7 +193,8 @@ export class AudioKernel {
     }
 
     stopAll() {
-        for (const id of this.tones.keys()) {
+        const ids = Array.from(this.tones.keys());
+        for (const id of ids) {
             this.removeTone(id);
         }
         if (this.ctx) {

@@ -34,6 +34,7 @@ class AppController {
                     const autoOpt = this.ui.selectSampleRate.querySelector('option[value="auto"]');
                     if (autoOpt) autoOpt.textContent = `Device Default (${actualSr} Hz)`;
                 }
+                this._resolvedAutoText = sr === 'auto' ? `Device Default (${actualSr} Hz)` : null;
                 
                 this.ui.selectSampleRate.disabled = true; 
                 
@@ -53,6 +54,10 @@ class AppController {
             this.ui.btnPower.textContent = 'POWER ON';
             this.ui.btnPower.classList.remove('danger');
             this.ui.selectSampleRate.disabled = false;
+            
+            // Reset the dropdown text if we modified it
+            const autoOpt = this.ui.selectSampleRate.querySelector('option[value="auto"]');
+            if (autoOpt) autoOpt.textContent = 'Auto (Device Default)';
             
             this.ui.signalStack.innerHTML = `
                 <div class="empty-state" style="color: var(--text-secondary); text-align: center; font-family: var(--font-mono); padding: 2rem;">
@@ -74,6 +79,10 @@ class AppController {
 
         const tone = this.kernel.addTone();
         if (!tone) return;
+
+        // Remove the empty-state placeholder if present
+        const emptyState = this.ui.signalStack.querySelector('.empty-state');
+        if (emptyState) emptyState.remove();
 
         const row = document.createElement('div');
         row.className = 'signal-row';
@@ -122,18 +131,18 @@ class AppController {
                     <span><span class="sweep-time-out">0</span>%</span>
                 </div>
                 <div class="sweep-progress-bar" style="width: 100%; height: 4px; background: #222; border-radius: 2px; overflow: hidden;">
-                    <div class="sweep-progress-fill" style="width: 0%; height: 100%; background: var(--accent-cyan); transition: width 0.1s linear;"></div>
+                    <div class="sweep-progress-fill" style="width: 0%; height: 100%; background: var(--accent-cyan);"></div>
                 </div>
             </div>
         `;
 
         this.ui.signalStack.appendChild(row);
-        this.renderDynamicControls(tone.id, row, 'sine');
+        this.renderDynamicControls(tone.id, row, 'sine', tone);
 
         // Bind Main Events
         row.querySelector('.tone-type').addEventListener('change', (e) => {
             this.kernel.updateTone(tone.id, 'type', e.target.value);
-            this.renderDynamicControls(tone.id, row, e.target.value);
+            this.renderDynamicControls(tone.id, row, e.target.value, tone);
         });
 
         const updateSliderStyle = (slider, percent) => {
@@ -215,7 +224,7 @@ class AppController {
         });
     }
 
-    renderDynamicControls(id, row, type) {
+    renderDynamicControls(id, row, type, tone) {
         const container = row.querySelector('.dynamic-controls');
         const progressContainer = row.querySelector('.sweep-progress-container');
         
@@ -253,14 +262,14 @@ class AppController {
                 </div>
                 <div class="control-block">
                     <label>Duration (s)</label>
-                    <input type="number" class="sweep-dur" value="${tone.state.duration || 1.0}" min="0.1" max="60" step="0.1">
+                    <input type="number" class="sweep-dur" value="${tone ? tone.state.duration : 1.0}" min="0.1" max="60" step="0.1">
                 </div>
                 <div class="control-block">
                     <label>Mode</label>
                     <select class="sweep-mode">
-                        <option value="one-shot" ${tone.state.sweepMode==='one-shot'?'selected':''}>One-Shot</option>
-                        <option value="loop" ${tone.state.sweepMode==='loop'?'selected':''}>Loop</option>
-                        <option value="ping-pong" ${tone.state.sweepMode==='ping-pong'?'selected':''}>Ping-Pong</option>
+                        <option value="one-shot" ${tone && tone.state.sweepMode==='one-shot'?'selected':''}>One-Shot</option>
+                        <option value="loop" ${tone && tone.state.sweepMode==='loop'?'selected':''}>Loop</option>
+                        <option value="ping-pong" ${tone && tone.state.sweepMode==='ping-pong'?'selected':''}>Ping-Pong</option>
                     </select>
                 </div>
                 <div class="control-block">
