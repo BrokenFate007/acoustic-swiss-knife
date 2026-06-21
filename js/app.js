@@ -130,6 +130,10 @@ class AppController {
             this.renderDynamicControls(tone.id, row, e.target.value);
         });
 
+        const updateSliderStyle = (slider, percent) => {
+            slider.style.background = `linear-gradient(to right, var(--accent-cyan) ${percent}%, #333 ${percent}%)`;
+        };
+
         const valVolIn = row.querySelector('.val-vol-input');
         const sliderVol = row.querySelector('.tone-vol');
         
@@ -137,6 +141,7 @@ class AppController {
             const v = parseFloat(e.target.value);
             this.kernel.updateTone(tone.id, 'volume', v);
             if (valVolIn) valVolIn.value = Math.round(v * 100);
+            updateSliderStyle(sliderVol, v * 100);
         });
         
         if (valVolIn) {
@@ -148,6 +153,7 @@ class AppController {
                 const v = val / 100.0;
                 sliderVol.value = v;
                 this.kernel.updateTone(tone.id, 'volume', v);
+                updateSliderStyle(sliderVol, val);
             });
         }
 
@@ -158,6 +164,7 @@ class AppController {
             const v = parseFloat(e.target.value);
             this.kernel.updateTone(tone.id, 'pan', v);
             if (valPanIn) valPanIn.value = Math.round(v * 100);
+            updateSliderStyle(sliderPan, (v + 1) * 50);
         });
 
         if (valPanIn) {
@@ -169,8 +176,13 @@ class AppController {
                 const v = val / 100.0;
                 sliderPan.value = v;
                 this.kernel.updateTone(tone.id, 'pan', v);
+                updateSliderStyle(sliderPan, (v + 1) * 50);
             });
         }
+
+        // Initialize background styling
+        updateSliderStyle(sliderVol, parseFloat(sliderVol.value) * 100);
+        updateSliderStyle(sliderPan, (parseFloat(sliderPan.value) + 1) * 50);
 
         row.querySelector('.btn-remove').addEventListener('click', () => {
             this.kernel.removeTone(tone.id);

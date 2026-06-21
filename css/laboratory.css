@@ -157,18 +157,40 @@ main {
   gap: 0.25rem;
 }
 
+/* Custom Range Sliders */
 .signal-row input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
   width: 100%;
-  accent-color: var(--accent-cyan);
+  height: 4px;
+  background: #333;
+  border-radius: 2px;
+  outline: none;
   border: none !important;
   padding: 0 !important;
+  margin: 10px 0;
   box-shadow: none !important;
-  cursor: pointer;
-  height: auto;
 }
 
-.signal-row input[type="range"]:focus {
-  box-shadow: none !important;
+.signal-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  cursor: pointer;
+  box-shadow: 0 0 6px var(--accent-cyan);
+}
+
+.signal-row input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  cursor: pointer;
+  box-shadow: 0 0 6px var(--accent-cyan);
+  border: none;
 }
 
 .signal-row input[type="number"], .signal-row select {
