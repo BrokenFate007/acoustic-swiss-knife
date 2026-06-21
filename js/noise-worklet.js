@@ -74,6 +74,8 @@ class LabSignalProcessor extends AudioWorkletProcessor {
                 outSample *= 3.5; 
             }
             else if (this.type === 'sweep-lin' || this.type === 'sweep-log') {
+                let forceUpdate = false;
+
                 if (!this.isPlaying) {
                     outSample = 0;
                 } else {
@@ -95,6 +97,9 @@ class LabSignalProcessor extends AudioWorkletProcessor {
                     if (this.sweepDirection === 1 && this.sweepTime >= this.duration) {
                         if (this.sweepMode === 'one-shot') {
                             this.isPlaying = false;
+                            this.sweepTime = this.duration;
+                            currentFreq = this.endFreq;
+                            forceUpdate = true;
                         } else if (this.sweepMode === 'loop') {
                             this.sweepTime = 0; 
                         } else if (this.sweepMode === 'ping-pong') {
@@ -106,7 +111,7 @@ class LabSignalProcessor extends AudioWorkletProcessor {
                         this.sweepDirection = 1; 
                     }
                     
-                    if (i === 0 && Math.random() < 0.05) { // throttle UI updates
+                    if (i === 0 && (Math.random() < 0.05 || forceUpdate)) { 
                         shouldReportProgress = true;
                         progressReportData = {
                             progress: this.sweepTime / this.duration,
