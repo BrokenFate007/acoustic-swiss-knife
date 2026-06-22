@@ -3,6 +3,11 @@ export class AudioKernel {
         this.ctx = null;
         this.masterGain = null;
         this.analyser = null;
+        this.micSource = null;
+        this.micStream = null;
+        this.micMonitorGain = null;
+        this.recorderDest = null;
+        this.analysisMode = 'generator'; // 'generator' | 'mic' | 'both'
         this.tones = new Map();
         this.toneCounter = 0;
         this.workletLoaded = false;
@@ -29,8 +34,16 @@ export class AudioKernel {
         this.analyser.minDecibels = -120;
         this.analyser.maxDecibels = 0;
 
-        this.masterGain.connect(this.analyser);
-        this.analyser.connect(this.ctx.destination);
+        this.masterGain.connect(this.analyser);        // generator → analyser (for analysis)
+        this.masterGain.connect(this.ctx.destination);  // generator → speakers (always)
+
+        // Mic monitor gain (muted by default to prevent feedback)
+        this.micMonitorGain = this.ctx.createGain();
+        this.micMonitorGain.gain.value = 0;
+        this.micMonitorGain.connect(this.ctx.destination);
+
+        // Recorder destination
+        this.recorderDest = this.ctx.createMediaStreamDestination();
         
         try {
             await this.ctx.audioWorklet.addModule(`js/noise-worklet.js?v=${Date.now()}`);
@@ -217,7 +230,81 @@ export class AudioKernel {
         }
     }
 
+    // ===== MIC INPUT =====
+    async connectMic(deviceId) {
+        // Stop any existing mic
+        this.disconnectMic();
+
+        const constraints = {
+            audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+            video: false
+        };
+
+        try {
+            this.micStream = await navigator.mediaDevices.getUserMedia(constraints);
+            this.micSource = this.ctx.createMediaStreamSource(this.micStream);
+
+            // Connect mic to monitor gain (user controls via setMonitor)
+            this.micSource.connect(this.micMonitorGain);
+
+            // Connect mic to recorder destination
+            this.micSource.connect(this.recorderDest);
+
+            // Apply analysis routing
+            this._applyAnalysisRouting();
+
+            console.log('[AudioKernel] Mic connected.');
+            return true;
+        } catch (e) {
+            console.error('[AudioKernel] Mic access denied:', e);
+            return false;
+        }
+    }
+
+    disconnectMic() {
+        if (this.micSource) {
+            this.micSource.disconnect();
+            this.micSource = null;
+        }
+        if (this.micStream) {
+            this.micStream.getTracks().forEach(t => t.stop());
+            this.micStream = null;
+        }
+    }
+
+    setAnalysisMode(mode) {
+        this.analysisMode = mode;
+        this._applyAnalysisRouting();
+    }
+
+    _applyAnalysisRouting() {
+        // Disconnect current analysis sources
+        try { this.masterGain.disconnect(this.analyser); } catch(e) {}
+        if (this.micSource) {
+            try { this.micSource.disconnect(this.analyser); } catch(e) {}
+        }
+
+        // Reconnect based on mode
+        if (this.analysisMode === 'generator' || this.analysisMode === 'both') {
+            this.masterGain.connect(this.analyser);
+        }
+        if (this.micSource && (this.analysisMode === 'mic' || this.analysisMode === 'both')) {
+            this.micSource.connect(this.analyser);
+        }
+    }
+
+    setMonitor(enabled) {
+        if (this.micMonitorGain) {
+            this.micMonitorGain.gain.setTargetAtTime(enabled ? 1.0 : 0, this.ctx.currentTime, 0.015);
+        }
+    }
+
+    getRecorderDestination() {
+        return this.recorderDest;
+    }
+
     stopAll() {
+        this.disconnectMic();
         const ids = Array.from(this.tones.keys());
         for (const id of ids) {
             this.removeTone(id);
@@ -226,6 +313,8 @@ export class AudioKernel {
             this.ctx.close();
             this.ctx = null;
             this.analyser = null;
+            this.micMonitorGain = null;
+            this.recorderDest = null;
             this.workletLoaded = false;
         }
     }

@@ -493,17 +493,261 @@ input[type=number] {
   box-shadow: 0 0 10px rgba(255, 50, 50, 0.8);
 }
 
-/* Responsive */
+/* ============================================
+   WAVE 4: INPUT, RECORDER, SCOPE, SPL
+   ============================================ */
+
+/* --- Input & Recording Grid --- */
+.input-recording-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.full-width-btn {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.full-width-btn.capturing {
+  background: rgba(255, 0, 255, 0.15);
+  border-color: var(--accent-magenta);
+  color: var(--accent-magenta);
+}
+
+/* --- Toggle Switch --- */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+}
+
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #333;
+  border-radius: 10px;
+  transition: 0.2s;
+}
+
+.toggle-slider::before {
+  content: "";
+  position: absolute;
+  height: 14px; width: 14px;
+  left: 3px; bottom: 3px;
+  background: #888;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: rgba(0, 255, 255, 0.3);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(16px);
+  background: var(--accent-cyan);
+  box-shadow: 0 0 6px var(--accent-cyan);
+}
+
+.toggle-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+/* --- Recorder Controls --- */
+.recorder-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.rec-btn {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  border: 1px solid #cc3333;
+  color: #cc3333;
+  background: rgba(204, 51, 51, 0.1);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.rec-btn:hover:not(:disabled) {
+  background: #cc3333;
+  color: #000;
+}
+
+.rec-btn.recording {
+  background: #cc3333;
+  color: #fff;
+  animation: pulse-rec 1s infinite;
+}
+
+.rec-btn.stop-btn {
+  border-color: var(--text-secondary);
+  color: var(--text-secondary);
+  background: transparent;
+}
+
+.rec-btn.stop-btn:hover:not(:disabled) {
+  background: var(--text-secondary);
+  color: #000;
+}
+
+.rec-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.rec-duration {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--accent-yellow);
+  margin-left: auto;
+}
+
+.rec-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #333;
+}
+
+.rec-indicator.active {
+  background: #cc3333;
+  box-shadow: 0 0 8px rgba(204, 51, 51, 0.8);
+  animation: pulse-rec 1s infinite;
+}
+
+@keyframes pulse-rec {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* --- Oscilloscope & SPL Grid --- */
+.scope-spl-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 0.75rem;
+}
+
+.sub-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.sub-panel-header .sub-panel-title {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.scope-controls, .spl-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.scope-controls select, .spl-controls select {
+  padding: 0.2rem 0.3rem;
+  font-size: 0.75rem;
+}
+
+.scope-canvas-container {
+  height: 200px;
+}
+
+.spl-history-container {
+  height: 120px;
+  margin-top: 0.5rem;
+}
+
+/* --- SPL Meter Readouts --- */
+.spl-readouts {
+  padding: 0.25rem 0;
+}
+
+.spl-big {
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+.spl-big-value {
+  font-family: var(--font-mono);
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: var(--accent-cyan);
+  text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+.spl-big-unit {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-left: 0.3rem;
+}
+
+.spl-small-grid {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.25rem 0;
+}
+
+.spl-small-block {
+  text-align: center;
+}
+
+.spl-small-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.spl-small-value {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: var(--accent-yellow);
+  font-weight: bold;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
 @media (max-width: 700px) {
   .analyzer-header {
     flex-direction: column;
     align-items: stretch;
   }
-  .analyzer-bottom {
+  .analyzer-bottom,
+  .input-recording-grid,
+  .scope-spl-grid {
     grid-template-columns: 1fr;
   }
   .analyzer-toolbar {
     flex-wrap: wrap;
   }
 }
-

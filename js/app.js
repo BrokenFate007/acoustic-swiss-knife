@@ -1,5 +1,9 @@
 import { AudioKernel } from './audio-kernel.js';
 import { SpectrumVisualizer } from './spectrum-visualizer.js';
+import { MicInput } from './mic-input.js';
+import { AudioRecorder } from './audio-recorder.js';
+import { SPLMeter } from './spl-meter.js';
+import { Oscilloscope } from './oscilloscope.js';
 
 class AppController {
     constructor() {
@@ -26,10 +30,36 @@ class AppController {
             sliderSmoothing: document.getElementById('setting-smoothing'),
             smoothingVal: document.getElementById('smoothing-val'),
             selectBands: document.getElementById('setting-bands'),
-            selectDecay: document.getElementById('setting-decay')
+            selectDecay: document.getElementById('setting-decay'),
+            // Wave 4: Mic, Recorder, Scope, SPL
+            micDevice: document.getElementById('mic-device'),
+            micMode: document.getElementById('mic-mode'),
+            micMonitor: document.getElementById('mic-monitor'),
+            monitorLabel: document.getElementById('monitor-label'),
+            btnMicCapture: document.getElementById('btn-mic-capture'),
+            recSource: document.getElementById('rec-source'),
+            recBitDepth: document.getElementById('rec-bitdepth'),
+            btnRecStart: document.getElementById('btn-rec-start'),
+            btnRecStop: document.getElementById('btn-rec-stop'),
+            recDuration: document.getElementById('rec-duration'),
+            recIndicator: document.getElementById('rec-indicator'),
+            scopeCanvas: document.getElementById('scope-canvas'),
+            scopeTimescale: document.getElementById('scope-timescale'),
+            btnScopeFreeze: document.getElementById('btn-scope-freeze'),
+            btnScopeExport: document.getElementById('btn-scope-export'),
+            splWeighting: document.getElementById('spl-weighting'),
+            splTimeWeight: document.getElementById('spl-time-weight'),
+            btnSplReset: document.getElementById('btn-spl-reset'),
+            splStats: document.getElementById('spl-stats'),
+            splHistoryCanvas: document.getElementById('spl-history-canvas'),
+            splCalibration: document.getElementById('spl-calibration')
         };
 
         this.visualizer = null;
+        this.micInput = null;
+        this.recorder = null;
+        this.oscilloscope = null;
+        this.splMeter = null;
 
         this.bindEvents();
     }
@@ -119,6 +149,59 @@ class AppController {
         this.ui.selectDecay.addEventListener('change', (e) => {
             if (this.visualizer) this.visualizer.setDecay(e.target.value);
         });
+
+        // ===== WAVE 4 BINDINGS =====
+
+        // Mic capture
+        this.ui.btnMicCapture.addEventListener('click', () => this._toggleMicCapture());
+
+        this.ui.micMode.addEventListener('change', (e) => {
+            if (this.micInput) this.micInput.setAnalysisMode(e.target.value);
+        });
+
+        this.ui.micMonitor.addEventListener('change', (e) => {
+            if (this.micInput) {
+                this.micInput.setMonitor(e.target.checked);
+                this.ui.monitorLabel.textContent = e.target.checked ? 'ON' : 'OFF';
+            }
+        });
+
+        // Recorder
+        this.ui.btnRecStart.addEventListener('click', () => this._startRecording());
+        this.ui.btnRecStop.addEventListener('click', () => this._stopRecording());
+
+        // Oscilloscope
+        this.ui.scopeTimescale.addEventListener('change', (e) => {
+            if (this.oscilloscope) this.oscilloscope.setTimeScale(parseFloat(e.target.value));
+        });
+
+        this.ui.btnScopeFreeze.addEventListener('click', () => {
+            if (this.oscilloscope) {
+                const frozen = this.oscilloscope.toggleFreeze();
+                this.ui.btnScopeFreeze.classList.toggle('active', frozen);
+            }
+        });
+
+        this.ui.btnScopeExport.addEventListener('click', () => {
+            if (this.oscilloscope) this.oscilloscope.exportPNG();
+        });
+
+        // SPL Meter
+        this.ui.splWeighting.addEventListener('change', (e) => {
+            if (this.splMeter) this.splMeter.setWeighting(e.target.value);
+        });
+
+        this.ui.splTimeWeight.addEventListener('change', (e) => {
+            if (this.splMeter) this.splMeter.setTimeWeighting(e.target.value);
+        });
+
+        this.ui.btnSplReset.addEventListener('click', () => {
+            if (this.splMeter) this.splMeter.reset();
+        });
+
+        this.ui.splCalibration.addEventListener('change', (e) => {
+            if (this.splMeter) this.splMeter.setCalibration(e.target.value);
+        });
     }
 
     async togglePower() {
@@ -158,6 +241,30 @@ class AppController {
                 const dbMax = parseInt(this.ui.dbMax.value, 10) || 0;
                 this.visualizer.setDbRange(dbMin, dbMax);
                 this.visualizer.start();
+
+                // Start oscilloscope
+                this.oscilloscope = new Oscilloscope(
+                    this.ui.scopeCanvas,
+                    this.kernel.getAnalyser(),
+                    actualSr
+                );
+                this.oscilloscope.start();
+
+                // Start SPL meter
+                this.splMeter = new SPLMeter(
+                    this.ui.splHistoryCanvas,
+                    this.ui.splStats,
+                    this.kernel.getAnalyser(),
+                    actualSr
+                );
+                this.splMeter.start();
+
+                // Initialize mic input and recorder
+                this.micInput = new MicInput(this.kernel);
+                this.recorder = new AudioRecorder(this.kernel);
+
+                // Enumerate mic devices
+                this._populateMicDevices();
             } catch (err) {
                 console.error("Failed to initialize Audio Engine:", err);
                 alert("Failed to start audio engine. " + err.message);
@@ -170,6 +277,28 @@ class AppController {
                 this.visualizer.destroy();
                 this.visualizer = null;
             }
+
+            // Stop oscilloscope
+            if (this.oscilloscope) {
+                this.oscilloscope.destroy();
+                this.oscilloscope = null;
+            }
+
+            // Stop SPL meter
+            if (this.splMeter) {
+                this.splMeter.destroy();
+                this.splMeter = null;
+            }
+
+            // Stop mic & recorder
+            if (this.micInput && this.micInput.isCapturing) {
+                this.micInput.stopCapture();
+                this.ui.btnMicCapture.textContent = 'Start Capture';
+                this.ui.btnMicCapture.classList.remove('capturing');
+            }
+            this._stopRecording();
+            this.micInput = null;
+            this.recorder = null;
 
             this.isPoweredOn = false;
             this.ui.btnPower.textContent = 'POWER ON';
@@ -415,6 +544,70 @@ class AppController {
                 this.kernel.updateTone(id, 'resetSweep', null);
             });
         }
+    }
+
+    // ===== WAVE 4 HELPERS =====
+
+    async _populateMicDevices() {
+        if (!this.micInput) return;
+        const devices = await this.micInput.enumerateDevices();
+        this.ui.micDevice.innerHTML = '<option value="">Select Microphone...</option>';
+        for (const d of devices) {
+            const opt = document.createElement('option');
+            opt.value = d.deviceId;
+            opt.textContent = d.label;
+            this.ui.micDevice.appendChild(opt);
+        }
+    }
+
+    async _toggleMicCapture() {
+        if (!this.micInput || !this.isPoweredOn) return;
+
+        if (this.micInput.isCapturing) {
+            this.micInput.stopCapture();
+            this.ui.btnMicCapture.textContent = 'Start Capture';
+            this.ui.btnMicCapture.classList.remove('capturing');
+        } else {
+            const deviceId = this.ui.micDevice.value || null;
+            const success = await this.micInput.startCapture(deviceId);
+            if (success) {
+                // Apply current analysis mode
+                this.micInput.setAnalysisMode(this.ui.micMode.value);
+                this.ui.btnMicCapture.textContent = 'Stop Capture';
+                this.ui.btnMicCapture.classList.add('capturing');
+
+                // Re-enumerate to get labels (now that permission is granted)
+                await this._populateMicDevices();
+            } else {
+                alert('Could not access microphone. Check permissions.');
+            }
+        }
+    }
+
+    _startRecording() {
+        if (!this.recorder || !this.isPoweredOn) return;
+        this.recorder.source = this.ui.recSource.value;
+        this.recorder.bitDepth = parseInt(this.ui.recBitDepth.value, 10);
+        this.recorder.onTick = (elapsed) => {
+            const min = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const sec = Math.floor(elapsed % 60).toString().padStart(2, '0');
+            this.ui.recDuration.textContent = `${min}:${sec}`;
+        };
+        this.recorder.start();
+        this.ui.btnRecStart.classList.add('recording');
+        this.ui.btnRecStart.disabled = true;
+        this.ui.btnRecStop.disabled = false;
+        this.ui.recIndicator.classList.add('active');
+    }
+
+    _stopRecording() {
+        if (!this.recorder || !this.recorder.isRecording) return;
+        this.recorder.stop();
+        this.ui.btnRecStart.classList.remove('recording');
+        this.ui.btnRecStart.disabled = false;
+        this.ui.btnRecStop.disabled = true;
+        this.ui.recIndicator.classList.remove('active');
+        this.ui.recDuration.textContent = '00:00';
     }
 }
 

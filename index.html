@@ -141,6 +141,142 @@
                 </div>
             </div>
         </section>
+
+        <!-- INPUT & RECORDING -->
+        <section class="panel" id="input-panel">
+            <div class="panel-header">
+                <h2 class="panel-title">Input & Recording</h2>
+            </div>
+            <div class="input-recording-grid">
+                <div class="sub-panel">
+                    <h3 class="sub-panel-title">Microphone Input</h3>
+                    <div class="settings-grid">
+                        <label for="mic-device">Device</label>
+                        <select id="mic-device">
+                            <option value="">Select Microphone...</option>
+                        </select>
+
+                        <label for="mic-mode">Analyze</label>
+                        <select id="mic-mode">
+                            <option value="generator" selected>Generator Only</option>
+                            <option value="mic">Mic Only</option>
+                            <option value="both">Generator + Mic</option>
+                        </select>
+
+                        <label>Monitor</label>
+                        <div class="toggle-row">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="mic-monitor">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span class="toggle-label" id="monitor-label">OFF</span>
+                        </div>
+                    </div>
+                    <button id="btn-mic-capture" class="full-width-btn" style="margin-top: 0.75rem;">Start Capture</button>
+                </div>
+
+                <div class="sub-panel">
+                    <h3 class="sub-panel-title">Audio Recorder</h3>
+                    <div class="settings-grid">
+                        <label for="rec-source">Source</label>
+                        <select id="rec-source">
+                            <option value="generator" selected>Generator</option>
+                            <option value="mic">Microphone</option>
+                            <option value="both">Both</option>
+                        </select>
+
+                        <label for="rec-bitdepth">Bit Depth</label>
+                        <select id="rec-bitdepth">
+                            <option value="16">16-bit PCM</option>
+                            <option value="24">24-bit PCM</option>
+                            <option value="32" selected>32-bit Float</option>
+                        </select>
+                    </div>
+                    <div class="recorder-controls">
+                        <button id="btn-rec-start" class="rec-btn">● REC</button>
+                        <button id="btn-rec-stop" class="rec-btn stop-btn" disabled>■ STOP</button>
+                        <span class="rec-duration" id="rec-duration">00:00</span>
+                        <span class="rec-indicator" id="rec-indicator"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- OSCILLOSCOPE & SPL METER -->
+        <section class="panel" id="scope-spl-panel">
+            <div class="scope-spl-grid">
+                <div class="sub-panel">
+                    <div class="sub-panel-header">
+                        <h3 class="sub-panel-title">Oscilloscope</h3>
+                        <div class="scope-controls">
+                            <label for="scope-timescale">Time</label>
+                            <select id="scope-timescale">
+                                <option value="0.5">0.5 ms</option>
+                                <option value="1">1 ms</option>
+                                <option value="2">2 ms</option>
+                                <option value="5" selected>5 ms</option>
+                                <option value="10">10 ms</option>
+                                <option value="20">20 ms</option>
+                                <option value="50">50 ms</option>
+                            </select>
+                            <button class="toolbar-btn" id="btn-scope-freeze" title="Freeze">⏸</button>
+                            <button class="toolbar-btn" id="btn-scope-export" title="Export PNG">↓</button>
+                        </div>
+                    </div>
+                    <div class="canvas-container scope-canvas-container">
+                        <canvas id="scope-canvas"></canvas>
+                    </div>
+                </div>
+
+                <div class="sub-panel">
+                    <div class="sub-panel-header">
+                        <h3 class="sub-panel-title">SPL Meter</h3>
+                        <div class="spl-controls">
+                            <select id="spl-weighting">
+                                <option value="Z" selected>Z (Flat)</option>
+                                <option value="A">A-Weight</option>
+                                <option value="C">C-Weight</option>
+                            </select>
+                            <select id="spl-time-weight">
+                                <option value="fast" selected>Fast</option>
+                                <option value="slow">Slow</option>
+                            </select>
+                            <button class="toolbar-btn" id="btn-spl-reset" title="Reset">↺</button>
+                        </div>
+                    </div>
+                    <div class="spl-readouts" id="spl-stats">
+                        <div class="spl-big">
+                            <span class="spl-big-value spl-lp">---</span>
+                            <span class="spl-big-unit">dBFS</span>
+                        </div>
+                        <div class="spl-small-grid">
+                            <div class="spl-small-block">
+                                <span class="spl-small-label">Leq</span>
+                                <span class="spl-small-value spl-leq">---</span>
+                            </div>
+                            <div class="spl-small-block">
+                                <span class="spl-small-label">Lmax</span>
+                                <span class="spl-small-value spl-lmax">---</span>
+                            </div>
+                            <div class="spl-small-block">
+                                <span class="spl-small-label">Lmin</span>
+                                <span class="spl-small-value spl-lmin">---</span>
+                            </div>
+                        </div>
+                        <div class="settings-grid" style="margin-top: 0.5rem;">
+                            <label for="spl-calibration">Cal. Offset</label>
+                            <div class="db-range-inputs">
+                                <input type="number" id="spl-calibration" value="0" step="0.1">
+                                <span class="db-unit">dB</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="canvas-container spl-history-container">
+                        <canvas id="spl-history-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <script type="module" src="js/app.js"></script>
