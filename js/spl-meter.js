@@ -38,8 +38,9 @@ export class SPLMeter {
         this.lmax = -Infinity;
         this.lmin = Infinity;
         this.smoothedLevel = -Infinity;
-        this._powerSum = 0;
-        this._sampleCount = 0;
+        this._lastComputeTime = null;
+        this._leqBuffer = [];          // Rolling window for Leq
+        this._leqWindowSize = 900;     // ~30 seconds at 30fps
 
         // History (60 seconds at ~30fps = ~1800 points, but we store 1/sec = 60 points)
         this.history = [];
@@ -110,10 +111,10 @@ export class SPLMeter {
         this.leq = -Infinity;
         this.lmax = -Infinity;
         this.lmin = Infinity;
-        this._powerSum = 0;
-        this._sampleCount = 0;
+        this._leqBuffer = [];
         this.history = [];
         this.smoothedLevel = -Infinity;
+        this._lastComputeTime = null;
     }
 
     start() {
@@ -161,35 +162,48 @@ export class SPLMeter {
         this.analyser.getFloatFrequencyData(this.dataArray);
 
         // Sum power across all bins with weighting
+        // Use a noise floor clamp to reject -Infinity bins from AnalyserNode
+        const NOISE_FLOOR = -150;
         let sumPower = 0;
-        let count = 0;
+        let peak = -Infinity;
         for (let i = 1; i < this.dataArray.length; i++) {
-            const db = this.dataArray[i] + this._weightingLUT[i];
-            if (!isFinite(db)) continue;
-            sumPower += Math.pow(10, db / 10);
-            count++;
+            let db = this.dataArray[i] + this._weightingLUT[i];
+            if (!isFinite(db) || db < NOISE_FLOOR) db = NOISE_FLOOR;
+            const power = Math.pow(10, db / 10);
+            sumPower += power;
+            if (db > peak) peak = db;
         }
 
-        // Instantaneous broadband level
-        const rawLp = count > 0 ? 10 * Math.log10(sumPower / count) : -Infinity;
-        this.lp = rawLp + this.calibrationOffset;
+        // Broadband RMS level (total power, not per-bin average)
+        // This is the standard: Lp = 10 * log10(Σ power_i)
+        const binCount = this.dataArray.length - 1; // skip DC bin
+        const rawLp = binCount > 0 ? 10 * Math.log10(sumPower) : -Infinity;
+        this.lp = isFinite(rawLp) ? rawLp + this.calibrationOffset : -Infinity;
 
-        // Time weighting (exponential moving average)
+        // Time weighting (exponential moving average with REAL elapsed time)
         const tau = this.timeWeighting === 'fast' ? 0.125 : 1.0;
-        const dt = this.frameBudgetMs / 1000;
+        const now = performance.now() / 1000;
+        const dt = this._lastComputeTime ? Math.min(now - this._lastComputeTime, 0.2) : 0.033;
+        this._lastComputeTime = now;
         const alpha = 1 - Math.exp(-dt / tau);
 
-        if (!isFinite(this.smoothedLevel)) {
-            this.smoothedLevel = this.lp;
+        if (!isFinite(this.smoothedLevel) || !isFinite(this.lp)) {
+            if (isFinite(this.lp)) this.smoothedLevel = this.lp;
         } else {
             this.smoothedLevel += alpha * (this.lp - this.smoothedLevel);
         }
 
-        // Leq (energy average over all samples)
+        // Leq: rolling window (last ~30 seconds at 30fps ≈ 900 samples)
         if (isFinite(this.lp)) {
-            this._powerSum += Math.pow(10, this.lp / 10);
-            this._sampleCount++;
-            this.leq = 10 * Math.log10(this._powerSum / this._sampleCount);
+            this._leqBuffer.push(Math.pow(10, this.lp / 10));
+            if (this._leqBuffer.length > this._leqWindowSize) {
+                this._leqBuffer.shift();
+            }
+            let leqSum = 0;
+            for (let i = 0; i < this._leqBuffer.length; i++) {
+                leqSum += this._leqBuffer[i];
+            }
+            this.leq = 10 * Math.log10(leqSum / this._leqBuffer.length);
         }
 
         // Lmax / Lmin
