@@ -734,16 +734,45 @@ input[type=number] {
   font-weight: bold;
 }
 
-/* --- Footer Watermark --- */
+/* --- Elegant Footer Watermark --- */
 .app-footer {
-  text-align: center;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  opacity: 0.6;
-  padding: 1.5rem 0 0.5rem 0;
-  letter-spacing: 0.5px;
+  margin-top: auto; /* Pushes to bottom */
+  background-color: rgba(10, 10, 10, 0.8);
+  border-top: 1px solid var(--border-color);
+  padding: 1.25rem 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   user-select: none;
+  backdrop-filter: blur(5px);
+}
+
+.footer-content {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.footer-name {
+  color: var(--accent-cyan);
+  opacity: 0.8;
+  font-weight: bold;
+}
+
+.footer-separator {
+  color: var(--accent-magenta);
+  opacity: 0.5;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.footer-lab {
+  color: var(--text-secondary);
+  opacity: 0.7;
 }
 
 /* ============================================
@@ -761,5 +790,12 @@ input[type=number] {
   }
   .analyzer-toolbar {
     flex-wrap: wrap;
+  }
+  .footer-content {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .footer-separator {
+    display: none;
   }
 }
