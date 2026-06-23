@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Acoustic Lab Master</title>
+    <title>Acoustic Swiss Knife</title>
     <link rel="stylesheet" href="css/laboratory.css">
 </head>
+
 <body>
     <header>
-        <h1>Acoustic Lab Master</h1>
+        <h1>Acoustic Swiss Knife</h1>
         <div class="controls-group">
             <div class="control-block">
                 <label for="master-samplerate">Sample Rate</label>
@@ -44,12 +46,13 @@
             </div>
             <div id="signal-stack" class="signal-table">
                 <!-- Tone rows will be injected here by app.js -->
-                <div class="empty-state" style="color: var(--text-secondary); text-align: center; font-family: var(--font-mono); padding: 2rem;">
+                <div class="empty-state"
+                    style="color: var(--text-secondary); text-align: center; font-family: var(--font-mono); padding: 2rem;">
                     AUDIO SYSTEM OFFLINE. POWER ON TO BEGIN.
                 </div>
             </div>
         </section>
-        
+
         <section class="panel" id="analyzer-panel">
             <div class="analyzer-header">
                 <div class="view-tabs">
@@ -172,7 +175,8 @@
                             <span class="toggle-label" id="monitor-label">OFF</span>
                         </div>
                     </div>
-                    <button id="btn-mic-capture" class="full-width-btn" style="margin-top: 0.75rem;">Start Capture</button>
+                    <button id="btn-mic-capture" class="full-width-btn" style="margin-top: 0.75rem;">Start
+                        Capture</button>
                 </div>
 
                 <div class="sub-panel">
@@ -281,4 +285,5 @@
 
     <script type="module" src="js/app.js"></script>
 </body>
+
 </html>
