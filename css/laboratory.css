@@ -734,6 +734,18 @@ input[type=number] {
   font-weight: bold;
 }
 
+/* --- Footer Watermark --- */
+.app-footer {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  padding: 1.5rem 0 0.5rem 0;
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
 /* ============================================
    RESPONSIVE
    ============================================ */
